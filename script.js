@@ -6,14 +6,20 @@ const snowflakes = {
 };
 
 const INTERVAL = 10;
+const STARTING_POSITION = '-10vh';
+const STOPPING_POSITION = '110vh';
 const $snow = document.querySelector('.snow')
 
 window.app = {
+  // settings
+  threshold: 150,
   speed: 300,
-  variation: 70,
+  variation: 10,
+  // runtime
+  count: 0,
   current: 0,
   next: 0,
-  last: 0
+  last: 0,
 };
 
 function _getRandomNum(from, to) {
@@ -21,7 +27,7 @@ function _getRandomNum(from, to) {
 }
 
 function _createElementFromHTML(htmlString) {
-  var div = document.createElement('div');
+  let div = document.createElement('div');
   div.innerHTML = htmlString.trim();
 
   return div.firstChild; 
@@ -48,28 +54,43 @@ class Snowflake {
     const x = _getRandomNum(1, 100);
     const $svg = _createElementFromHTML(snowflakes[this.image]);
 
-    $svg.style.top = '-10vh';
+    $svg.style.top = STARTING_POSITION;
     $svg.style.left = `${x}vw`;
     $svg.classList.add('snowflake');
     $svg.classList.add(`layer-${this.layer}`);
     $svg.setAttribute('id', `#flake${this.id}`);
 
     this.$el = $svg;
+    this.$el.addEventListener('webkitTransitionEnd', () => this.reset());
     this.$canvas.appendChild(this.$el);
   }
 
-  destroy () {
-    const $flake = document.getElementById(`#flake${this.id}`);
-    this.$canvas.removeChild($flake);
+  reset () {
+    this.$el.classList.add('disable-animation');
+    setTimeout(() => {
+      let x = _getRandomNum(1, 100);
+
+      this.$el.style.left = `${x}vw`;
+      this.$el.style.top = STARTING_POSITION;
+
+      setTimeout(() => {
+        this.$el.classList.remove('disable-animation');
+        this.animate();
+      }, 100);
+    }, 100);
   }
 
   animate () {
-    this.$el.style.top = '110vh';
-    this.$el.addEventListener('webkitTransitionEnd', () => this.destroy());
+    this.$el.style.top = STOPPING_POSITION;
   }
 }
 
-setInterval(() => {
+let interval = setInterval(() => {
+  if (window.app.count >= window.app.threshold) {
+    clearInterval(interval);
+    return;
+  }
+
   if (window.app.next <= window.app.current) {
     const from = app.speed - app.variation;
     const to = app.speed + app.variation;
@@ -77,9 +98,10 @@ setInterval(() => {
     const flake = new Snowflake($snow);
 
     flake.fly();
+    window.app.count += 1;
     window.app.next = window.app.current + space;
     window.app.last = window.app.current;
   }
 
-  window.app.current += INTERVAL
+  window.app.current += INTERVAL;
 }, INTERVAL);

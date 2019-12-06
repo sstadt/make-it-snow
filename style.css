@@ -18,14 +18,16 @@ body {
 
 .snowflake {
   position: absolute;
-  transform: translate(-50%, -50%);
+  animation-name: sway;
+  animation-iteration-count: infinite;
+  animation-duration: 5s;
 }
 
 .snowflake.layer-1 {
   height: 4px;
   width: 4px;
   z-index: 1;
-  transition: 20s linear top;
+  transition: 40s linear top;
 }
 
 .snowflake.layer-2 {
@@ -39,5 +41,28 @@ body {
   height: 12px;
   width: 12px;
   z-index: 3;
-  transition: 40s linear top;
+  transition: 20s linear top;
+}
+
+.snowflake.disable-animation {
+  transition: none !important;
+}
+
+@keyframes sway {
+  0% {
+    margin-left: 0;
+    transform: rotate(0deg);
+  }
+
+  25% {
+    margin-left: 1%;
+  }
+
+  75% {
+    margin-left: 1%;
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
